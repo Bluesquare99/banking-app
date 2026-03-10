@@ -6,8 +6,10 @@ from enum import Enum
 app = FastAPI()
 
 volume_path = Path("/ledger")
-stocks_file = str(volume_path / "stock.txt") if volume_path.exists() else "stock.txt"
-stocks_file.touch()
+stocks_file = Path("stock.txt")
+ledger = volume_path / stocks_file if volume_path.exists() else stocks_file 
+with open(ledger, 'w') as f:
+    f.write('0')
 
 class OrderType(str, Enum):
     buy = "buy"
@@ -18,13 +20,13 @@ class Order(BaseModel):
     amount: int
 
 def enter_order(order: Order):
-    with open(stocks_file, 'r') as f:
+    with open(ledger, 'r') as f:
         cur_price = int(f.read())
     if order.order_type == OrderType.buy:
         cur_price += order.amount
     elif order.order_type == OrderType.sell:
         cur_price -= order.amount
-    with open(stocks_file, 'w') as f:
+    with open(ledger, 'w') as f:
         f.write(str(cur_price))
 
 

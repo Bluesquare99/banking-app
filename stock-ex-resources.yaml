@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: banking
+  name: stock-ex
 spec:
   selector:
     matchLabels:
-      app: banking
+      app: stock-ex
   template:
     metadata:
       labels:
-        app: banking
+        app: stock-ex
     spec:
       containers:
-      - name: banking
+      - name: stock-ex
         # image: ghcr.io/bluesquare99/banking:latest
-        image: banking 
+        image: stock-ex 
         imagePullPolicy: Never
         resources:
           requests:
@@ -39,10 +39,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: banking-lb
+  name: stock-ex-lb
 spec:
   selector:
-    app: banking 
+    app: stock-ex 
   ports:
     - protocol: TCP
       port: 8000 # The port the Load Balancer listens on (External)
