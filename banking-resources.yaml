@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking
+spec:
+  selector:
+    matchLabels:
+      app: banking
+  template:
+    metadata:
+      labels:
+        app: banking
+    spec:
+      containers:
+      - name: banking
+        # image: ghcr.io/bluesquare99/banking:latest
+        image: banking 
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: local-storage
+            mountPath: /ledger # Where, inside of the container, the volume is.
+        ports:
+          - name: pod-custom-port
+            containerPort: 80
+      volumes:
+        - name: local-storage
+          persistentVolumeClaim:
+            claimName: local-persistent-volume-claim
+      # imagePullSecrets:
+      # - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-lb
+spec:
+  selector:
+    app: banking 
+  ports:
+    - protocol: TCP
+      port: 8000 # The port the Load Balancer listens on (External)
+      targetPort: 80 # The port your container is listening on (Internal)
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-persistent-volume
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /persistent_volume/logs
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-persistent-volume-claim
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
