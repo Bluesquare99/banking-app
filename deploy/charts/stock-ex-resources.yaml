@@ -16,6 +16,9 @@ spec:
         # image: ghcr.io/bluesquare99/banking:latest
         image: stock-ex 
         imagePullPolicy: Never
+        ports:
+          - name: pod-custom-port
+            containerPort: 80
         resources:
           requests:
             memory: "64Mi"
@@ -26,9 +29,6 @@ spec:
         volumeMounts:
           - name: local-storage
             mountPath: /ledger # Where, inside of the container, the volume is.
-        ports:
-          - name: pod-custom-port
-            containerPort: 80
       volumes:
         - name: local-storage
           persistentVolumeClaim:
